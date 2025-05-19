@@ -1,1 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recordatorio para Comer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos para un look dark fitness con contraste mejorado */
+        body {
+            font-family: 'Roboto', sans-serif; /* Usamos Roboto */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Gradiente oscuro y deportivo con mayor contraste */
+            background: linear-gradient(to right top, #0f172a, #1e293b); /* Tonos aún más oscuros */
+            color: #f1f5f9; /* Texto muy claro */
+            padding: 1rem; /* Añadir padding para pantallas pequeñas */
+        }
+        .container {
+            background-color: #1e293b; /* Un gris oscuro para el contenedor */
+            padding: 2.5rem; /* Un poco más de padding */
+            border-radius: 1rem; /* Bordes más redondeados */
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5); /* Sombra más pronunciada y oscura */
+            text-align: center;
+            width: 95%; /* Más ancho en pantallas pequeñas */
+            max-width: 450px; /* Máximo ancho */
+            animation: fadeIn 1s ease-out; /* Animación de entrada */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #67e8f9; /* Un cian brillante para el título (alto contraste) */
+            font-weight: 700; /* Negrita */
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+             color: #cbd5e1; /* Gris claro para las etiquetas (mayor contraste) */
+        }
+
+        input[type="number"], input[type="time"] {
+            background-color: #334155; /* Fondo oscuro para los inputs */
+            color: #f1f5f9; /* Texto muy claro en los inputs */
+            border-color: #334155; /* Borde oscuro */
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="number"]:focus, input[type="time"]:focus {
+            border-color: #67e8f9; /* Color de enfoque brillante (alto contraste) */
+            box-shadow: 0 0 0 3px rgba(103, 232, 249, 0.3); /* Sombra de enfoque con el color brillante */
+        }
+
+        button {
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-weight: 700;
+            text-transform: uppercase; /* Texto en mayúsculas */
+            letter-spacing: 0.05em; /* Espaciado entre letras */
+            width: 100%; /* Botones de ancho completo por defecto */
+            color: #1e293b; /* Texto oscuro en los botones para alto contraste */
+        }
+
+        button:active {
+            transform: scale(0.98); /* Efecto de pulsación */
+        }
+
+        #startBtn {
+            background-color: #34d399; /* Verde brillante (alto contraste) */
+            box-shadow: 0 4px 6px rgba(52, 211, 153, 0.3);
+            margin-bottom: 1rem; /* Espacio entre botones */
+        }
+
+        #startBtn:hover {
+            background-color: #10b981; /* Verde más oscuro al pasar el ratón */
+        }
+
+        #stopBtn {
+            background-color: #f87171; /* Rojo brillante (alto contraste) */
+            box-shadow: 0 4px 6px rgba(248, 113, 113, 0.3);
+        }
+
+        #stopBtn:hover {
+            background-color: #ef4444; /* Rojo más oscuro al pasar el ratón */
+        }
+
+        #status {
+            color: #cbd5e1; /* Gris claro para el estado (mayor contraste) */
+            font-size: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .alert {
+            background-color: #fcd34d; /* Amarillo (alto contraste en fondo oscuro) */
+            color: #451a03; /* Marrón muy oscuro para el texto de la alerta (alto contraste) */
+            padding: 1.2rem; /* Más padding */
+            border-radius: 0.75rem; /* Bordes más redondeados */
+            margin-top: 2rem;
+            font-weight: 700;
+            animation: pulse 1.5s infinite; /* Animación de pulsación */
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Estilos para los botones de acción en la alerta */
+        .alert-actions {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+        }
+
+        .alert-actions button {
+            width: 48%; /* Ancho para que quepan dos botones */
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            text-transform: none; /* No mayúsculas para estos botones */
+            letter-spacing: normal;
+        }
+
+        .btn-comido {
+            background-color: #34d399; /* Verde */
+            color: #1e293b; /* Texto oscuro */
+        }
+         .btn-comido:hover {
+            background-color: #10b981; /* Verde más oscuro */
+        }
+
+        .btn-saltado {
+            background-color: #f87171; /* Rojo */
+            color: #1e293b; /* Texto oscuro */
+        }
+        .btn-saltado:hover {
+            background-color: #ef4444; /* Rojo más oscuro */
+        }
+
+        /* Estilos para la sección de historial */
+        #historySection {
+            margin-top: 2.5rem;
+            text-align: left; /* Alinear texto a la izquierda */
+            border-top: 1px solid #334155; /* Línea separadora */
+            padding-top: 1.5rem;
+        }
+
+        #historySection h2 {
+            color: #67e8f9; /* Color del título del historial */
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center; /* Centrar título del historial */
+        }
+
+        #historyList {
+            list-style: none; /* Eliminar viñetas */
+            padding: 0;
+        }
+
+        #historyList li {
+            background-color: #334155; /* Fondo para cada elemento del historial */
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .status-pending {
+            color: #fcd34d; /* Amarillo para pendiente */
+        }
+        .status-comido {
+            color: #34d399; /* Verde para comido */
+        }
+        .status-saltado {
+            color: #f87171; /* Rojo para saltado */
+        }
+
+
+        /* Estilos responsivos para los botones principales */
+        @media (min-width: 768px) {
+            button:not(.alert-actions button) { /* Aplicar solo a botones principales */
+                width: auto; /* Ancho automático en pantallas medianas/grandes */
+                display: inline-block; /* Mostrar en línea */
+                margin: 0 0.5rem 0 0.5rem; /* Espacio entre ellos */
+            }
+             #startBtn {
+                margin-bottom: 0; /* Eliminar margen inferior en pantallas grandes */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Recordatorio para Comer</h1>
+
+        <div class="mb-4">
+            <label for="interval" class="block text-sm font-bold mb-2">
+                Intervalo (en minutos):
+            </label>
+            <input type="number" id="interval" value="60" min="10" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <div class="mb-4 flex flex-wrap -mx-2">
+            <div class="w-1/2 px-2">
+                <label for="startTime" class="block text-sm font-bold mb-2">
+                    Hora de Inicio:
+                </label>
+                <input type="time" id="startTime" value="08:00" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="w-1/2 px-2">
+                <label for="endTime" class="block text-sm font-bold mb-2">
+                    Hora de Fin:
+                </label>
+                <input type="time" id="endTime" value="20:00" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+        </div>
+
+
+        <button id="startBtn" class="text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            Iniciar Recordatorio
+        </button>
+        <button id="stopBtn" class="text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline" disabled>
+            Detener Recordatorio
+        </button>
+
+        <div id="status" class="mt-4 text-gray-600">
+            Esperando para iniciar...
+        </div>
+
+        <div id="alertBox" class="alert hidden">
+            <p>¡Es hora de comer!</p>
+            <div class="alert-actions">
+                <button class="btn-comido" id="comidoBtn">Comido</button>
+                <button class="btn-saltado" id="saltadoBtn">Saltado</button>
+            </div>
+        </div>
+
+        <audio id="notificationSound" src="https://www.soundjay.com/button/sounds/button-1.mp3" preload="auto"></audio>
+
+        <div id="historySection">
+            <h2>Historial de Recordatorios</h2>
+            <ul id="historyList">
+                </ul>
+        </div>
+
+    </div>
+
+    <script>
+        const intervalInput = document.getElementById('interval');
+        const startTimeInput = document.getElementById('startTime');
+        const endTimeInput = document.getElementById('endTime');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusDiv = document.getElementById('status');
+        const alertBox = document.getElementById('alertBox');
+        const notificationSound = document.getElementById('notificationSound');
+        const comidoBtn = document.getElementById('comidoBtn');
+        const saltadoBtn = document.getElementById('saltadoBtn');
+        const historyList = document.getElementById('historyList');
+
+        let reminderTimeout; // Usaremos setTimeout para encadenar recordatorios
+        const localStorageKeys = {
+            interval: 'eatReminderInterval',
+            startTime: 'eatReminderStartTime',
+            endTime: 'eatReminderEndTime',
+            history: 'eatReminderHistory' // Clave para el historial
+        };
+
+        // Cargar la configuración guardada y el historial al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedInterval = localStorage.getItem(localStorageKeys.interval);
+            const savedStartTime = localStorage.getItem(localStorageKeys.startTime);
+            const savedEndTime = localStorage.getItem(localStorageKeys.endTime);
+
+            if (savedInterval) {
+                intervalInput.value = savedInterval;
+            }
+            if (savedStartTime) {
+                startTimeInput.value = savedStartTime;
+            }
+            if (savedEndTime) {
+                endTimeInput.value = savedEndTime;
+            }
+
+            if (savedInterval || savedStartTime || savedEndTime) {
+                 statusDiv.textContent = "Configuración anterior cargada. Pulsa Iniciar para continuar.";
+            } else {
+                statusDiv.textContent = "Introduce la configuración y pulsa Iniciar.";
+            }
+
+            // Cargar y mostrar el historial
+            renderHistory();
+
+            // Ocultar la alerta inicialmente
+            hideAlert();
+        });
+
+
+        // Función para mostrar la alerta y reproducir sonido
+        function showAlert() {
+            alertBox.classList.remove('hidden');
+            notificationSound.play(); // Reproducir el sonido
+            // No ocultamos automáticamente para que el usuario pueda interactuar
+        }
+
+        // Función para ocultar la alerta
+        function hideAlert() {
+            alertBox.classList.add('hidden');
+        }
+
+        // Función para obtener el historial del localStorage
+        function getHistory() {
+            const historyJson = localStorage.getItem(localStorageKeys.history);
+            return historyJson ? JSON.parse(historyJson) : [];
+        }
+
+        // Función para guardar el historial en localStorage
+        function saveHistory(history) {
+            localStorage.setItem(localStorageKeys.history, JSON.stringify(history));
+        }
+
+        // Función para añadir un nuevo recordatorio al historial (inicialmente pendiente)
+        function logReminder(time) {
+            const history = getHistory();
+            history.push({ time: time.toISOString(), status: 'pending' });
+            saveHistory(history);
+            renderHistory(); // Actualizar la vista del historial
+        }
+
+        // Función para actualizar el estado del último recordatorio pendiente
+        function updateLastReminderStatus(status) {
+            const history = getHistory();
+            // Encontrar el último recordatorio pendiente
+            for (let i = history.length - 1; i >= 0; i--) {
+                if (history[i].status === 'pending') {
+                    history[i].status = status;
+                    break; // Actualizar solo el último
+                }
+            }
+            saveHistory(history);
+            renderHistory(); // Actualizar la vista del historial
+        }
+
+        // Función para renderizar el historial en la interfaz
+        function renderHistory() {
+            const history = getHistory();
+            historyList.innerHTML = ''; // Limpiar la lista actual
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<li>No hay recordatorios registrados aún.</li>';
+                return;
+            }
+
+            // Mostrar solo los últimos 10 recordatorios para no saturar
+            const recentHistory = history.slice(-10);
+
+            recentHistory.forEach(item => {
+                const listItem = document.createElement('li');
+                const reminderTime = new Date(item.time);
+                const timeString = reminderTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateString = reminderTime.toLocaleDateString();
+
+                let statusText = '';
+                let statusClass = '';
+                switch (item.status) {
+                    case 'pending':
+                        statusText = 'Pendiente';
+                        statusClass = 'status-pending';
+                        break;
+                    case 'comido':
+                        statusText = 'Comido';
+                        statusClass = 'status-comido';
+                        break;
+                    case 'saltado':
+                        statusText = 'Saltado';
+                        statusClass = 'status-saltado';
+                        break;
+                }
+
+                listItem.innerHTML = `
+                    <span>${dateString} ${timeString}</span>
+                    <span class="${statusClass}">${statusText}</span>
+                `;
+                historyList.appendChild(listItem);
+            });
+        }
+
+
+        // Función para calcular la hora del próximo recordatorio
+        function calculateNextReminderTime(intervalMinutes, startTimeStr, endTimeStr) {
+            const now = new Date();
+            const currentDay = now.getDate();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            // Parsear hora de inicio y fin para hoy
+            const [startHour, startMinute] = startTimeStr.split(':').map(Number);
+            const todayStartTime = new Date(currentYear, currentMonth, currentDay, startHour, startMinute, 0);
+
+            const [endHour, endMinute] = endTimeStr.split(':').map(Number);
+             // Manejar el caso de que la hora de fin sea al día siguiente (ej: 22:00 a 06:00)
+            const todayEndTime = new Date(currentYear, currentMonth, currentDay, endHour, endMinute, 0);
+             if (todayEndTime < todayStartTime) {
+                todayEndTime.setDate(todayEndTime.getDate() + 1); // La hora de fin es al día siguiente
+            }
+
+
+            // Calcular la hora del próximo recordatorio
+            let nextReminderTime = new Date(now.getTime() + intervalMinutes * 60 * 1000);
+
+            // Si la hora calculada está fuera del rango de hoy, programar para el inicio de mañana
+            if (nextReminderTime < todayStartTime || nextReminderTime > todayEndTime) {
+                 // Si ya pasamos la hora de fin de hoy, programar para el inicio de mañana
+                if (now > todayEndTime && todayStartTime > todayEndTime) { // Caso de rango nocturno y ya pasó la hora de fin
+                     const tomorrowStartTime = new Date(currentYear, currentMonth, currentDay + 1, startHour, startMinute, 0);
+                     nextReminderTime = tomorrowStartTime;
+                } else if (now > todayEndTime && todayStartTime < todayEndTime) { // Caso de rango diurno y ya pasó la hora de fin
+                     const tomorrowStartTime = new Date(currentYear, currentMonth, currentDay + 1, startHour, startMinute, 0);
+                     nextReminderTime = tomorrowStartTime;
+                }
+                else if (now < todayStartTime) { // Si aún no llegamos a la hora de inicio de hoy
+                     nextReminderTime = todayStartTime;
+                } else { // Si la hora calculada está fuera del rango pero la hora actual está dentro (esto no debería pasar con la lógica de arriba, pero como fallback)
+                     const tomorrowStartTime = new Date(currentYear, currentMonth, currentDay + 1, startHour, startMinute, 0);
+                     nextReminderTime = tomorrowStartTime;
+                }
+            }
+
+             // Asegurarse de que el próximo recordatorio no sea en el pasado
+            if (nextReminderTime < now) {
+                 // Si el próximo recordatorio calculado es en el pasado, y estamos dentro del rango de hoy,
+                 // significa que el intervalo nos lleva más allá del fin del día.
+                 // En este caso, el próximo recordatorio es mañana al inicio.
+                 if (now >= todayStartTime && now <= todayEndTime) {
+                     const tomorrowStartTime = new Date(currentYear, currentMonth, currentDay + 1, startHour, startMinute, 0);
+                     nextReminderTime = tomorrowStartTime;
+                 } else {
+                      // Si estamos fuera del rango y el próximo recordatorio es en el pasado,
+                      // significa que el próximo recordatorio debería ser mañana al inicio.
+                      const tomorrowStartTime = new Date(currentYear, currentMonth, currentDay + 1, startHour, startMinute, 0);
+                      nextReminderTime = tomorrowStartTime;
+                 }
+            }
+
+
+            return nextReminderTime;
+        }
+
+        // Función para programar el próximo recordatorio
+        function scheduleNextReminder() {
+            const intervalInMinutes = parseInt(intervalInput.value);
+            const startTimeStr = startTimeInput.value;
+            const endTimeStr = endTimeInput.value;
+
+            const now = new Date();
+
+            // Calcular la hora del próximo recordatorio
+            const nextReminderTime = calculateNextReminderTime(intervalInMinutes, startTimeStr, endTimeStr);
+
+            // Calcular el retraso hasta el próximo recordatorio
+            const delay = nextReminderTime.getTime() - now.getTime();
+
+            // Limpiar cualquier temporizador existente
+            clearTimeout(reminderTimeout);
+
+            // Programar el próximo recordatorio
+            reminderTimeout = setTimeout(() => {
+                // Cuando el recordatorio se activa:
+                logReminder(new Date()); // Registrar el recordatorio en el historial como pendiente
+                showAlert(); // Mostrar la alerta
+                scheduleNextReminder(); // Programar el siguiente recordatorio
+            }, delay);
+
+            // Actualizar el estado
+            const nextReminderTimeString = nextReminderTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(startTimeStr.split(':')[0]), parseInt(startTimeStr.split(':')[1]));
+            const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(endTimeStr.split(':')[0]), parseInt(endTimeStr.split(':')[1]));
+
+            let eatingWindowStatus = `Ventana de comidas: ${startTimeStr} - ${endTimeStr}.`;
+            // Check if current time is outside the eating window, considering cross-midnight range
+            const [startHour, startMinute] = startTimeStr.split(':').map(Number);
+            const [endHour, endMinute] = endTimeStr.split(':').map(Number);
+            const nowHours = now.getHours();
+            const nowMinutes = now.getMinutes();
+            const nowTotalMinutes = nowHours * 60 + nowMinutes;
+            const startTotalMinutes = startHour * 60 + startMinute;
+            const endTotalMinutes = endHour * 60 + endMinute;
+
+            let isDuringEatingWindow = false;
+            if (startTotalMinutes < endTotalMinutes) { // Rango diurno (ej: 08:00 - 20:00)
+                if (nowTotalMinutes >= startTotalMinutes && nowTotalMinutes <= endTotalMinutes) {
+                    isDuringEatingWindow = true;
+                }
+            } else { // Rango nocturno (ej: 22:00 - 06:00)
+                if (nowTotalMinutes >= startTotalMinutes || nowTotalMinutes <= endTotalMinutes) {
+                    isDuringEatingWindow = true;
+                }
+            }
+
+
+            if (!isDuringEatingWindow) {
+                 eatingWindowStatus = `Ventana de comidas: ${startTimeStr} - ${endTimeStr}. (Actualmente en ayuno)`;
+            }
+
+
+            statusDiv.textContent = `Recordatorio iniciado. ${eatingWindowStatus} Próxima alerta a las ${nextReminderTimeString}.`;
+
+        }
+
+
+        // Función para iniciar el temporizador
+        function startTimer() {
+            const intervalInMinutes = parseInt(intervalInput.value);
+            const startTimeStr = startTimeInput.value;
+            const endTimeStr = endTimeInput.value;
+
+            if (isNaN(intervalInMinutes) || intervalInMinutes <= 0) {
+                statusDiv.textContent = "Por favor, introduce un intervalo válido en minutos.";
+                return;
+            }
+             if (!startTimeStr || !endTimeStr) {
+                 statusDiv.textContent = "Por favor, introduce la hora de inicio y fin.";
+                 return;
+             }
+
+
+            // Guardar la configuración en localStorage
+            localStorage.setItem(localStorageKeys.interval, intervalInMinutes);
+            localStorage.setItem(localStorageKeys.startTime, startTimeStr);
+            localStorage.setItem(localStorageKeys.endTime, endTimeStr);
+
+
+            // Iniciar el ciclo de recordatorios
+            scheduleNextReminder();
+
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+        }
+
+        // Función para detener el temporizador
+        function stopTimer() {
+            clearTimeout(reminderTimeout);
+            statusDiv.textContent = "Recordatorio detenido.";
+            hideAlert(); // Ocultar la alerta al detener
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        // Event listeners para los botones
+        startBtn.addEventListener('click', startTimer);
+        stopBtn.addEventListener('click', stopTimer);
+
+        // Event listeners para los botones de acción de la alerta
+        comidoBtn.addEventListener('click', () => {
+            updateLastReminderStatus('comido');
+            hideAlert();
+        });
+
+        saltadoBtn.addEventListener('click', () => {
+            updateLastReminderStatus('saltado');
+            hideAlert();
+        });
+
+
+    </script>
+</body>
+</html>
 
